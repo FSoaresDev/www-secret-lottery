@@ -1,5 +1,8 @@
 import { useContext, useEffect, useState } from "react"
+import buyTickets from "../api/buyTickets"
 import getBalance from "../api/getBalance"
+import getConfigs, { Configs } from "../api/getConfigs"
+import getRounds, { IRound } from "../api/getRounds"
 import constants from "../constants"
 import { BalancesDispatchContext } from "../context/BalancesContext"
 import { ClientContext, IClientState } from "../context/ClientContext"
@@ -10,9 +13,35 @@ export default ({
 } : {
     menu: string
 }) => {
-    
     const client = useContext(ClientContext);
     const viewkey = useContext(ViewKeyContext);
+
+    const [configs, setConfigs] = useState<Configs | null>(null)
+    const [currentRoundsState, setCurrentRoundsState] = useState<IRound | null>(null)
+
+    useEffect(() => {
+        if (client && viewkey) {
+            getConfigsTrigger(client)
+        }
+    }, [client, viewkey])
+
+    useEffect(() => {
+        if (client && viewkey && configs) {
+            getCurrentRound(client,configs.current_round_number);
+        }
+    }, [configs])
+
+    const getConfigsTrigger = async (client: IClientState) => {
+        const configs = await getConfigs(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+        setConfigs(configs)
+    } 
+
+    const getCurrentRound = async (client: IClientState, current_round: number) => {
+        const currentRound = await getRounds(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS,[current_round])
+        setCurrentRoundsState(currentRound.rounds[0])
+    } 
+
+    console.log(currentRoundsState)
     /*
     const balancesDispatch = useContext(BalancesDispatchContext);
     const currentRoundsState = useContext(CurrentRoundsStateContext);
@@ -94,7 +123,22 @@ export default ({
     if (!viewkey) return null
     return (
         <div> 
-           Home
+            <div style={{ color: "white", width: "100%" }}>
+                <button type="button" className="btn btn-success" style={{ borderRadius: "10px", margin: "5px" }}
+                    onClick={() => {
+                        if (!currentRoundsState) return 
+                        const tickets = ["123456"]
+                        buyTickets(
+                            client,
+                            constants.SEFI_CONTRACT_ADDRESS,
+                            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+                            tickets,
+                            "" + parseInt(currentRoundsState.round_ticket_price) * tickets.length
+                            )}
+                    }>
+                    Buy Tickets
+                </button>
+            </div>
         </div>  
     )
 } 
