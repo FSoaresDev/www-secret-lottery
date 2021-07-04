@@ -12,6 +12,7 @@ import { errorNotification } from "../utils/notifications";
 import { Modal, NavDropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import convertTosSCRT from "../api/convertTosSCRT";
+import triggerTestnet from "../api/triggerTestnet";
 
 export default ({
     menu
@@ -93,12 +94,10 @@ export default ({
                 </a>
                 <div className="navbar-nav">
                         <h3 style={{
-                            color: "#424242",
-                            marginRight: "20px",
-                            marginLeft: "10px",
-                            cursor: "pointer"
+                            color: "white",
+                            marginRight: "10px",
                         }}>
-                            Lottery
+                            Secret Lottery
                         </h3>
                 </div>
                 
@@ -184,6 +183,17 @@ export default ({
                                         </button>
                                     </div>
                                 }
+                                <div className="col" style={{ padding: "3px" }}>
+                                        <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
+                                            onClick={async () => {
+                                                await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                            } 
+                                            }>
+                                            {
+                                                "Trigger"
+                                            }
+                                        </button>
+                                </div>
                             </div>
 
                         </div>

@@ -45,8 +45,8 @@ const setupKeplr = async (setClient: any) => {
     await window.keplr.experimentalSuggestChain({
       chainId: constants.CHAIN_ID, 
       chainName: "Local Secret Chain",
-      rpc: "http://bootstrap.secrettestnet.io:26657",
-      rest: "https://bootstrap.secrettestnet.io",
+      rpc: "https://chainofsecrets.secrettestnet.io:26667",
+      rest: "https://chainofsecrets.secrettestnet.io",
       bip44: {
         coinType: 529,
       },
@@ -96,7 +96,7 @@ const setupKeplr = async (setClient: any) => {
     const accounts = await keplrOfflineSigner.getAccounts();
   
     const execute = await new SigningCosmWasmClient(
-      "https://bootstrap.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
+      "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
       accounts[0].address,
       window.getOfflineSigner(constants.CHAIN_ID),
       window.getEnigmaUtils(constants.CHAIN_ID),
@@ -104,12 +104,12 @@ const setupKeplr = async (setClient: any) => {
         // 300k - Max gas units we're willing to use for init
         init: {
           amount: [{ amount: "500000", denom: "uscrt" }],
-          gas: "500000",
+          gas: "2000000",
         },
         // 300k - Max gas units we're willing to use for exec
         exec: {
           amount: [{ amount: "500000", denom: "uscrt" }],
-          gas: "500000",
+          gas: "2000000",
         },
       }
     )
