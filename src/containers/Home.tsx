@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Col, Container, Dropdown, Row } from "react-bootstrap"
 import buyTickets from "../api/buyTickets"
 import getBalance from "../api/getBalance"
@@ -12,6 +12,10 @@ import { ViewKeyContext } from "../context/ViewKeyContext"
 import formatNumber from "../utils/formatNumber"
 import generateRandomTickets from "../utils/generateRandomTickets"
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+import getPaginatedUserTickets, { IPaginatedUserTickets } from "../api/getPaginatedUserTickets"
+import getPrizedTicketResults from "../utils/getPrizedTicketResults"
+import claimRewards from "../api/claimRewards"
+import getTicketsIndexToClaim from "../utils/getTicketsIndexToClaim"
 
 export default ({
     menu
@@ -28,11 +32,20 @@ export default ({
     const [isManualTickets, setIsManualTickets] = useState<boolean>(false);
     const [autoTicketsCount, setAutoTicketsCount] = useState<string>("0");
     const [manualTickets, setManualTickets] = useState<string[]>([]);
-
+    const [paginatedUserTickets, setPaginatedUserTickets] = useState<IPaginatedUserTickets | null>(null);
+    const [expandRow, setExpandRow] = useState<number | null>(null);
+    const [paginationValues, setPaginationsValues] = useState<{
+        page_size: number,
+        page: number
+    }>({
+        page_size: 5,
+        page: 1
+    })
 
     useEffect(() => {
         if (client && viewkey) {
             getConfigsTrigger(client)
+            getPaginatedUserTicketsTrigger(client, viewkey, paginationValues.page, paginationValues.page_size)
         }
     }, [client, viewkey])
 
@@ -53,12 +66,16 @@ export default ({
 
         const [currentRound, currentRoundUserTickets] = await Promise.all([currentRoundPromise, currentRoundUserTicketsPromise]);
 
-        console.log(currentRoundUserTickets)
         setCurrentRoundsState(currentRound.rounds[0])
         setCurrentRoundUserTickets(currentRoundUserTickets.user_tickets[0])
     }
 
-    console.log(currentRoundsState)
+    const getPaginatedUserTicketsTrigger = async (client: IClientState, viewkey: string, page: number, page_size: number) => {
+        const paginatedUserTickets = await getPaginatedUserTickets(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, viewkey, page - 1, page_size)
+        setPaginatedUserTickets(paginatedUserTickets);
+    }
+
+    console.log(paginatedUserTickets)
     /*
     const balancesDispatch = useContext(BalancesDispatchContext);
     const currentRoundsState = useContext(CurrentRoundsStateContext);
@@ -132,6 +149,138 @@ export default ({
         setPaginatedUserBets(response)
     }
 */
+
+    const calcTotalRewards = (draftedTicket: string, tickets: IUserTicket[], round: IRound) => {
+        if (!round.reward_distribution) return 0
+
+        const prizedTickets = getPrizedTicketResults(draftedTicket, tickets);
+        let totalExpectedToClaimRewards = 0;
+
+        if (prizedTickets.sequence_1.length > 0) {
+            totalExpectedToClaimRewards = totalExpectedToClaimRewards + prizedTickets.sequence_1.length * parseInt(round.reward_distribution.sequence_1_reward_per_ticket!);
+        }
+        if (prizedTickets.sequence_2.length > 0) {
+            totalExpectedToClaimRewards = totalExpectedToClaimRewards + prizedTickets.sequence_2.length * parseInt(round.reward_distribution.sequence_2_reward_per_ticket!);
+        }
+        if (prizedTickets.sequence_3.length > 0) {
+            totalExpectedToClaimRewards = totalExpectedToClaimRewards + prizedTickets.sequence_3.length * parseInt(round.reward_distribution.sequence_3_reward_per_ticket!);
+        }
+        if (prizedTickets.sequence_4.length > 0) {
+            totalExpectedToClaimRewards = totalExpectedToClaimRewards + prizedTickets.sequence_4.length * parseInt(round.reward_distribution.sequence_4_reward_per_ticket!);
+        }
+        if (prizedTickets.sequence_5.length > 0) {
+            totalExpectedToClaimRewards = totalExpectedToClaimRewards + prizedTickets.sequence_5.length * parseInt(round.reward_distribution.sequence_5_reward_per_ticket!);
+        }
+        if (prizedTickets.sequence_6.length > 0) {
+            totalExpectedToClaimRewards = totalExpectedToClaimRewards + prizedTickets.sequence_6.length * parseInt(round.reward_distribution.sequence_6_reward_per_ticket!);
+        }
+
+        return totalExpectedToClaimRewards
+    }
+
+    const remainingToClaimTickets = (draftedTicket: string, tickets: IUserTicket[], round: IRound) => {
+        if (!round.reward_distribution) return {
+            tickets: [],
+            remainingPrizeToClaim: 0
+        }
+
+        let remainingToClaimTickets: IUserTicket[] = [];
+
+        const prizedTickets = getPrizedTicketResults(draftedTicket, tickets);
+
+        for (let ticket of tickets) {
+            if (
+                prizedTickets.sequence_1.find((prizedTicket) => prizedTicket.ticket === ticket.ticket && !ticket.claimed_reward) || 
+                prizedTickets.sequence_2.find((prizedTicket) => prizedTicket.ticket === ticket.ticket && !ticket.claimed_reward) ||
+                prizedTickets.sequence_3.find((prizedTicket) => prizedTicket.ticket === ticket.ticket && !ticket.claimed_reward) ||
+                prizedTickets.sequence_4.find((prizedTicket) => prizedTicket.ticket === ticket.ticket && !ticket.claimed_reward) ||
+                prizedTickets.sequence_5.find((prizedTicket) => prizedTicket.ticket === ticket.ticket && !ticket.claimed_reward) ||
+                prizedTickets.sequence_6.find((prizedTicket) => prizedTicket.ticket === ticket.ticket && !ticket.claimed_reward)
+            ) {
+                remainingToClaimTickets.push(ticket)
+            }
+        }
+
+        return {
+            tickets: remainingToClaimTickets,
+            remainingPrizeToClaim: calcTotalRewards(draftedTicket, remainingToClaimTickets, round)
+        }
+    }
+
+    const claimButtonLogic = async (round: IRound, userRoundTickets: IUserTicket[], ticketToClaim: IUserTicket | null = null) => {
+        if (!client || !paginatedUserTickets) return
+        let ticketIndexes: number[] = [];
+
+        if (!ticketToClaim) {
+            ticketIndexes = getTicketsIndexToClaim(
+                userRoundTickets, remainingToClaimTickets(round.drafted_ticket!, userRoundTickets, round).tickets
+            )
+        } else {
+            const index = userRoundTickets.findIndex((userRoundTicket) => userRoundTicket.ticket === ticketToClaim.ticket && !userRoundTicket.claimed_reward)
+            if (index != -1) ticketIndexes.push(index);
+        }
+
+        await claimRewards(
+            client,
+            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+            round.round_number,
+            ticketIndexes
+        );
+    }
+
+    const expandedRowRewardsColumn = (round: IRound, ticket: IUserTicket, userTickets: IUserTicket[]) => {
+        if (!round.drafted_ticket || !round.reward_distribution) return " - "
+        let ticketResults = getPrizedTicketResults(round.drafted_ticket, [ticket]);
+
+        let accumutatedTicketRewards = 0;
+
+        if (ticketResults.sequence_1.length > 0) {
+            accumutatedTicketRewards = accumutatedTicketRewards + parseInt(round.reward_distribution.sequence_1_reward_per_ticket);
+        }
+
+        if (ticketResults.sequence_2.length > 0) {
+            accumutatedTicketRewards = accumutatedTicketRewards + parseInt(round.reward_distribution.sequence_2_reward_per_ticket);
+        }
+
+        if (ticketResults.sequence_3.length > 0) {
+            accumutatedTicketRewards = accumutatedTicketRewards + parseInt(round.reward_distribution.sequence_3_reward_per_ticket);
+        }
+
+        if (ticketResults.sequence_4.length > 0) {
+            accumutatedTicketRewards = accumutatedTicketRewards + parseInt(round.reward_distribution.sequence_4_reward_per_ticket);
+        }
+
+        if (ticketResults.sequence_5.length > 0) {
+            accumutatedTicketRewards = accumutatedTicketRewards + parseInt(round.reward_distribution.sequence_5_reward_per_ticket);
+        }
+
+        if (ticketResults.sequence_6.length > 0) {
+            accumutatedTicketRewards = accumutatedTicketRewards + parseInt(round.reward_distribution.sequence_6_reward_per_ticket);
+        }
+
+        if (accumutatedTicketRewards === 0) return "No Reward"
+        else {
+            if (ticket.claimed_reward) {
+                return "Claimed " + formatNumber(accumutatedTicketRewards / 1000000) + " SEFI"
+            } else {
+                return (
+                    <button className="btn btn-success" onClick={() => claimButtonLogic(round, userTickets, ticket)}>
+                        Claim {formatNumber(accumutatedTicketRewards / 1000000)} SEFI
+                    </button>
+                )
+            }
+        }
+    }
+
+    const handlePageChange = async (page: number) => {
+        if (!client || !viewkey) return
+        getPaginatedUserTicketsTrigger(client, viewkey, page, paginationValues.page_size)
+        setPaginationsValues({
+            page,
+            page_size: 5
+        })
+    }
+
     if (!client) return (
         <div>
             <button className="btn btn-warning py-2 px-4" onClick={() => window.open("https://wallet.keplr.app/#/dashboard")}>Keplr Wallet</button>
@@ -186,7 +335,7 @@ export default ({
                                 <Row>
                                     {
                                         !isManualTickets &&
-                                        <div style={{width: "100%"}}>
+                                        <div style={{ width: "100%" }}>
                                             <span>How many tickets to buy?</span>
                                             <br />
                                             <div style={{ display: "flex", justifyContent: "center" }}>
@@ -226,7 +375,7 @@ export default ({
                                     }
                                     {
                                         isManualTickets &&
-                                        <div style={{width: "100%"}}>
+                                        <div style={{ width: "100%" }}>
                                             <span>Buy manual tickets</span>
                                             {
                                                 manualTickets.map((manualTicket, manualTicketIndex) =>
@@ -284,18 +433,36 @@ export default ({
                                         Buy
                                         <br />
                                         {
-                                            isManualTickets ? 
-                                            formatNumber((parseInt(currentRoundsState.round_ticket_price) * (manualTickets.length)) / 1000000) : 
-                                            formatNumber((parseInt(currentRoundsState.round_ticket_price) * (parseInt(autoTicketsCount))) / 1000000)
+                                            isManualTickets ?
+                                                formatNumber((parseInt(currentRoundsState.round_ticket_price) * (manualTickets.length)) / 1000000) :
+                                                formatNumber((parseInt(currentRoundsState.round_ticket_price) * (parseInt(autoTicketsCount))) / 1000000)
                                         } SEFI
                                     </button>
                                 </Row>
-                                <Row style={{ justifyContent: "center" }}>
-                                    You already have {currentRoundUserTickets && currentRoundUserTickets.length} tickets this round!
-                                </Row>
+                                {
+                                    currentRoundUserTickets && currentRoundUserTickets.length > 0 &&
+                                    <Row style={{ justifyContent: "center" }}>
+                                        <span>{"You already have "} <b> {(currentRoundUserTickets.length  + " tickets")} </b> {" this round!"} </span>
+                                        
+                                    </Row>
+                                }
                             </Col>
                             <Col style={{ borderRadius: "30px", border: "solid", marginLeft: "10px" }}>
-                                <span>Reward Pot Distribution</span>
+                                <div>Reward Pot Distribution</div>
+                                <br />
+                                {
+                                    configs &&
+                                    <div>
+                                        <div>{`6 Sequence (${configs.prize_pool_allocations.sequence_6}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.sequence_6 * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`5 Sequence (${configs.prize_pool_allocations.sequence_5}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.sequence_5 * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`4 Sequence (${configs.prize_pool_allocations.sequence_4}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.sequence_4 * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`3 Sequence (${configs.prize_pool_allocations.sequence_3}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.sequence_3 * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`2 Sequence (${configs.prize_pool_allocations.sequence_2}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.sequence_2 * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`1 Sequence (${configs.prize_pool_allocations.sequence_1}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.sequence_1 * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`Burn (${configs.prize_pool_allocations.burn}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.burn * 0.01) / 1000000)} SEFI`}</div>
+                                        <div>{`Triggerer Fee (${configs.prize_pool_allocations.triggerer}%) - ${formatNumber(parseInt(currentRoundsState.running_pot_size) * (configs.prize_pool_allocations.triggerer * 0.01) / 1000000)} SEFI`}</div>
+                                    </div>
+                                }
                             </Col>
                         </Row>
                     }
@@ -314,17 +481,121 @@ export default ({
                             <table className="table table-striped table-dark" style={{ margin: "20px" }}>
                                 <thead>
                                     <tr>
+                                        <th scope="col"></th>
                                         <th scope="col">Round</th>
                                         <th scope="col">End Date</th>
-                                        <th scope="col">Tickets</th>
-                                        <th scope="col">Total Reward</th>
-                                        <th scope="col">Actions</th>
+                                        <th scope="col">Drafted Ticket</th>
+                                        <th scope="col">My Tickets</th>
+                                        <th scope="col">Rewards</th>
                                     </tr>
                                 </thead>
+                                <tbody>
+                                    {
+                                        paginatedUserTickets &&
+                                        paginatedUserTickets.user_tickets.map((userRoundTickets, index) =>
+                                            <React.Fragment>
+                                                <tr key={index}>
+                                                    <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                        <button type="button" className="btn btn-secondary"> <i className="fas fa-eye"></i></button>
+                                                    </td>
+                                                    <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                        {paginatedUserTickets.rounds[index].round_number}
+                                                    </td>
+                                                    <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                        {paginatedUserTickets.rounds[index].round_end_timestamp ?
+                                                            <div>
+                                                                {new Date(paginatedUserTickets.rounds[index].round_end_timestamp! * 1000).toISOString().split("T")[0]}
+                                                                <br />
+                                                                {new Date(paginatedUserTickets.rounds[index].round_end_timestamp! * 1000).toISOString().split("T")[1].split(".")[0]}
+                                                            </div> :
+                                                            " - "}
+                                                    </td>
+                                                    <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                        {paginatedUserTickets.rounds[index].drafted_ticket ? paginatedUserTickets.rounds[index].drafted_ticket!.split('').join(' ') : " - "}
+                                                    </td>
+                                                    <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                        <button className={`btn btn-${expandRow === index ? "primary" : "info"}`} onClick={() => setExpandRow(expandRow === index ? null : index)}>
+                                                            {userRoundTickets.length + " Tickets"}
+                                                            {
+                                                                expandRow === index ?
+                                                                    <i className="fas fa-chevron-up" style={{ marginLeft: "10px" }}></i> :
+                                                                    <i className="fas fa-chevron-down" style={{ marginLeft: "10px" }}></i>
+                                                            }
+                                                        </button>
+                                                    </td>
+                                                    <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                        {
+                                                            paginatedUserTickets.rounds[index].drafted_ticket &&
+                                                                remainingToClaimTickets(paginatedUserTickets.rounds[index].drafted_ticket!, userRoundTickets, paginatedUserTickets.rounds[index]).remainingPrizeToClaim > 0 ?
+                                                                <button className="btn btn-success"
+                                                                    onClick={async () => {
+                                                                        claimButtonLogic(paginatedUserTickets.rounds[index], userRoundTickets, null);
+                                                                    }}>
+                                                                    {"Claim " + formatNumber(remainingToClaimTickets(paginatedUserTickets.rounds[index].drafted_ticket!, userRoundTickets, paginatedUserTickets.rounds[index]).remainingPrizeToClaim / 1000000) + " SEFI"}
+                                                                </button> :
+                                                                calcTotalRewards(paginatedUserTickets.rounds[index].drafted_ticket!, userRoundTickets, paginatedUserTickets.rounds[index]) > 0 ?
+                                                                    "" + formatNumber(calcTotalRewards(paginatedUserTickets.rounds[index].drafted_ticket!, userRoundTickets, paginatedUserTickets.rounds[index]) / 1000000) + " SEFI" :
+                                                                    " - "
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                {
+                                                    expandRow === index && userRoundTickets.map((userRoundTicket) =>
+                                                        <tr>
+                                                            <td style={{ display: "table-cell", verticalAlign: "middle" }} ></td>
+                                                            <td style={{ display: "table-cell", verticalAlign: "middle" }}>{userRoundTicket.round_number}</td>
+                                                            <td style={{ display: "table-cell", verticalAlign: "middle" }}>-</td>
+                                                            <td style={{ display: "table-cell", verticalAlign: "middle" }}>{paginatedUserTickets.rounds[index].drafted_ticket ? paginatedUserTickets.rounds[index].drafted_ticket!.split('').join(' ') : " - "}</td>
+                                                            <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                                {userRoundTicket.ticket.split("").join(" ")}
+                                                            </td>
+                                                            <td style={{ display: "table-cell", verticalAlign: "middle" }}>
+                                                                {
+                                                                    expandedRowRewardsColumn(paginatedUserTickets.rounds[index], userRoundTicket, userRoundTickets)
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                }
+                                            </React.Fragment>
+                                        )
+                                    }
+                                </tbody>
                             </table>
+                            <div className="d-flex align-items-center">
+                            <div className="ml-auto mr-3">
+                                {paginatedUserTickets && paginatedUserTickets.user_tickets_round_total_count > 0 && "Total number of Rounds: " + paginatedUserTickets.user_tickets_round_total_count}
+                            </div>
+                            {
+                                paginatedUserTickets && paginatedUserTickets.user_tickets_round_total_count > 0 &&
+                                <nav aria-label="...">
+                                    <ul className="pagination mb-0 my-3">
+                                        <button className="page-item btn btn-secondary rounded-0"
+                                            disabled={paginationValues.page === 1}
+                                            onClick={() => handlePageChange(1)}>
+                                            <i className="fas fa-angle-double-left"></i>
+                                        </button>
+                                        <button className="page-item btn btn-secondary rounded-0" onClick={() => handlePageChange(paginationValues.page - 1 > 0 ? paginationValues.page - 1 : 1)}>
+                                            <i className="fas fa-angle-left"></i>
+                                        </button>
+                                        <button
+                                            className="page-item btn btn-secondary rounded-0"
+                                            onClick={() =>
+                                                handlePageChange(paginationValues.page + 1 < Math.ceil(paginatedUserTickets.user_tickets_round_total_count / paginationValues.page_size) ? paginationValues.page + 1 : Math.ceil(paginatedUserTickets.user_tickets_round_total_count / paginationValues.page_size))
+                                            }>
+                                            <i className="fas fa-angle-right"></i>
+                                        </button>
+                                        <button className="page-item btn btn-secondary rounded-0"
+                                            disabled={paginationValues.page === Math.ceil(paginatedUserTickets.user_tickets_round_total_count / paginationValues.page_size)}
+                                            onClick={() => handlePageChange(Math.ceil(paginatedUserTickets.user_tickets_round_total_count / paginationValues.page_size))}>
+                                            <i className="fas fa-angle-double-right"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            }
+                        </div>
                         </Col>
                     </Row>
-
                 </Container>
 
             </div>

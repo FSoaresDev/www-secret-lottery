@@ -1,1 +1,1 @@
-export default (number: number) => Math.round(number * 10000) / 10000
+export default (number: number) => Math.round(number * 1000000) / 1000000

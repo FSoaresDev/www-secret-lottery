@@ -15,7 +15,7 @@ export default async (
             localStorage.clear();
         }
         return {
-            user_bets: []
+            user_tickets: []
         }
     }
 }
