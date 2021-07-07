@@ -8,6 +8,9 @@ export default async (client: IClientState, contractAddress: string) => {
             entropy: entropy(27)
         }
     };
-    const response = await client.execute.execute(contractAddress, handleMsg); 
+    const response = await client.execute.execute(contractAddress, handleMsg, undefined, undefined, {
+        amount: [{ amount: "500000", denom: "uscrt" }],
+        gas: "500000",
+    }); 
     return JSON.parse(fromUtf8(response.data))
 } 

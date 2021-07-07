@@ -1,7 +1,7 @@
 import { IUserTicket } from "../api/getUserTickets"
 
 export default (draftedTicket: string, tickets: IUserTicket[]) => {
-    let results: PrizedTicketResults = {
+    let results: IPrizedTicketResults = {
         sequence_1: [],
         sequence_2: [],
         sequence_3: [],
@@ -22,7 +22,7 @@ export default (draftedTicket: string, tickets: IUserTicket[]) => {
     return results
 }
 
-interface PrizedTicketResults {
+export interface IPrizedTicketResults {
     sequence_1: IUserTicket[],
     sequence_2: IUserTicket[],
     sequence_3: IUserTicket[],

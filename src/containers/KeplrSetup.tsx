@@ -104,12 +104,12 @@ const setupKeplr = async (setClient: any) => {
         // 300k - Max gas units we're willing to use for init
         init: {
           amount: [{ amount: "500000", denom: "uscrt" }],
-          gas: "2000000",
+          gas: "10000000",
         },
         // 300k - Max gas units we're willing to use for exec
         exec: {
           amount: [{ amount: "500000", denom: "uscrt" }],
-          gas: "2000000",
+          gas: "10000000",
         },
       }
     )
