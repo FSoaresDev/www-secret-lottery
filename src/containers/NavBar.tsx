@@ -105,6 +105,9 @@ export default ({
 
                 </div>
                 {
+                    !client && <button className="btn btn-warning py-2 px-4" onClick={() => window.open("https://wallet.keplr.app/#/dashboard")}>Get Keplr Wallet</button>
+                }
+                {
                     client && balances &&
                     <React.Fragment>
                         <div style={{ display: "flex", padding: "8px 13px", borderRadius: "10px" }}>
