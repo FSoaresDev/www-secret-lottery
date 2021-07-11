@@ -452,8 +452,8 @@ export default ({
                                         </Col>
                                     </Row>
 
-                                    <Row style={{ justifyContent: "center", fontSize: "2rem", marginTop: "10px" }}>
-                                        <Countdown />
+                                    <Row style={{ justifyContent: "center", fontSize: "1.25rem", marginTop: "10px" }}>
+                                        <Countdown currentRoundsState={currentRoundsState}/>
                                     </Row>
                                 </Col>
                                 <Col style={{ borderRadius: "30px", border: "solid", marginLeft: "10px", marginRight: "10px" }}>
@@ -796,13 +796,13 @@ export default ({
                                                             {paginatedUserTickets.rounds[index].round_number}
                                                         </td>
                                                         <td style={{ display: "table-cell", verticalAlign: "middle" }}>
-                                                            {paginatedUserTickets.rounds[index].round_end_timestamp ?
-                                                                <div>
+                                                            {paginatedUserTickets.rounds[index].round_end_block ? paginatedUserTickets.rounds[index].round_end_block : " - "
+                                                                /*<div>
                                                                     {new Date(paginatedUserTickets.rounds[index].round_end_timestamp! * 1000).toISOString().split("T")[0]}
                                                                     <br />
                                                                     {new Date(paginatedUserTickets.rounds[index].round_end_timestamp! * 1000).toISOString().split("T")[1].split(".")[0]}
                                                                 </div> :
-                                                                " - "}
+                                                        " - "*/}
                                                         </td>
                                                         <td style={{ display: "table-cell", verticalAlign: "middle" }}>
                                                             {paginatedUserTickets.rounds[index].drafted_ticket ? paginatedUserTickets.rounds[index].drafted_ticket!.split('').join(' ') : " - "}

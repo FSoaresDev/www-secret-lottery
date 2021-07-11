@@ -25,8 +25,10 @@ export interface IRound {
         sequence_4: number,
         sequence_5: number,
         sequence_6: number,
-    }
-    round_end_timestamp: number | null,
+    },
+    round_start_block: number,
+    round_expected_end_block: number,
+    round_end_block: number | null,
     drafted_ticket: string | null,
     final_pot_size: string | null,
     reward_distribution: IRoundRewardDistribution | null
