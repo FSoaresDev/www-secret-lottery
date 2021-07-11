@@ -16,7 +16,16 @@ export interface IRound {
     round_ticket_price: string,
     running_pot_size: string,
     ticket_count: number,
-    ticket_distribution: {[key: string]: number} | null,
+    round_reward_pot_allocations: {
+        triggerer: number,
+        burn: number,
+        sequence_1: number,
+        sequence_2: number,
+        sequence_3: number,
+        sequence_4: number,
+        sequence_5: number,
+        sequence_6: number,
+    }
     round_end_timestamp: number | null,
     drafted_ticket: string | null,
     final_pot_size: string | null,

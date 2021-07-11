@@ -25,15 +25,5 @@ export interface Configs {
         symbol: string
     },
     current_round_number: number,
-    base_ticket_price: string,
-    prize_pool_allocations: {
-        triggerer: number,
-        burn: number,
-        sequence_1: number,
-        sequence_2: number,
-        sequence_3: number,
-        sequence_4: number,
-        sequence_5: number,
-        sequence_6: number,
-    }
+    per_ticket_bulk_discount: number
 }
