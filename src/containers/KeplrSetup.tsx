@@ -1,5 +1,5 @@
 import { Dispatch, useContext, useEffect } from "react";
-import { SigningCosmWasmClient } from "secretjs";
+import { BroadcastMode, SigningCosmWasmClient } from "secretjs";
 import constants from "../constants";
 import {ClientDispatchContext} from "../context/ClientContext"
 
@@ -94,7 +94,7 @@ const setupKeplr = async (setClient: any) => {
     // This pops-up a window for the user to sign on each tx we sent
     const keplrOfflineSigner = window.getOfflineSigner(constants.CHAIN_ID);
     const accounts = await keplrOfflineSigner.getAccounts();
-  
+
     const execute = await new SigningCosmWasmClient(
       "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
       accounts[0].address,
@@ -111,7 +111,8 @@ const setupKeplr = async (setClient: any) => {
           amount: [{ amount: "500000", denom: "uscrt" }],
           gas: "10000000",
         },
-      }
+      },
+      BroadcastMode.Sync
     )
   
     const accountData = await execute.getAccount(accounts[0].address);

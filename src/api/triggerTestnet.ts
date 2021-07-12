@@ -1,3 +1,4 @@
+import { TxsResponse } from "secretjs";
 import { IClientState } from "../context/ClientContext";
 import entropy from "../utils/entropy";
 const { fromUtf8 } = require("@iov/encoding");
@@ -9,41 +10,63 @@ export default async (client: IClientState, contractAddress: string) => {
     },
   };
 
-  try {
-    await client.execute.execute(
-      contractAddress,
-      handleMsg,
-      undefined,
-      undefined,
-      {
-        amount: [{ amount: "500000", denom: "uscrt" }],
-        gas: "2000000",
-      }
-    );
-  } catch (e) {
-    if (!e.message.includes("520")) {
-      throw e;
+  const { transactionHash: transactionHash1 } = await client.execute.execute(
+    contractAddress,
+    handleMsg,
+    undefined,
+    undefined,
+    {
+      amount: [{ amount: "500000", denom: "uscrt" }],
+      gas: "750000",
     }
+  );
+
+  const tx1: TxsResponse = await new Promise((accept, reject) => {
+    const interval = setInterval(async () => {
+      try {
+        //@ts-ignore
+        const tx = await client.execute.restClient.txById(transactionHash1, false);
+        accept(tx);
+        clearInterval(interval);
+      } catch (error) {
+        //console.error(error);
+      }
+    }, 2000);
+  });
+
+  if (tx1.data.length === 0) {
+    throw Error(tx1.raw_log);
   }
 
   handleMsg = {
     trigger_end_and_start_round: {},
   };
 
-  try {
-    await client.execute.execute(
-      contractAddress,
-      handleMsg,
-      undefined,
-      undefined,
-      {
-        amount: [{ amount: "500000", denom: "uscrt" }],
-        gas: "5000000",
-      }
-    );
-  } catch (e) {
-    if (!e.message.includes("520")) {
-      throw e;
+  const { transactionHash: transactionHash2 } = await client.execute.execute(
+    contractAddress,
+    handleMsg,
+    undefined,
+    undefined,
+    {
+      amount: [{ amount: "500000", denom: "uscrt" }],
+      gas: "5000000",
     }
+  );
+
+  const tx2: TxsResponse = await new Promise((accept, reject) => {
+    const interval = setInterval(async () => {
+      try {
+        //@ts-ignore
+        const tx = await client.execute.restClient.txById(transactionHash1,false);
+        accept(tx);
+        clearInterval(interval);
+      } catch (error) {
+        //console.error(error);
+      }
+    }, 2000);
+  });
+
+  if (tx2.data.length === 0) {
+    throw Error(tx2.raw_log);
   }
 };

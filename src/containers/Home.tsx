@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react"
 import { Col, Container, Dropdown, Form, Row } from "react-bootstrap"
 import buyTickets from "../api/buyTickets"
 import getBalance from "../api/getBalance"
-import getConfigs, { Configs } from "../api/getConfigs"
+import getConfigs, { IConfigs } from "../api/getConfigs"
 import getRounds, { IRound } from "../api/getRounds"
 import getUserTickets, { IUserTicket } from "../api/getUserTickets"
 import constants from "../constants"
@@ -19,6 +19,8 @@ import getTicketsIndexToClaim from "../utils/getTicketsIndexToClaim"
 import { errorNotification, successNotification } from "../utils/notifications"
 import Countdown from "./Countdown"
 import calcBulkDiscountTicketPrice from "../utils/calcBulkDiscountTicketPrice"
+import getRoundStakingRewards, { IStakingRewads } from "../api/getRoundStakingRewards"
+import calcTotalPotSize from "../utils/calcTotalPotSize"
 
 export default ({
     menu
@@ -29,9 +31,10 @@ export default ({
     const viewkey = useContext(ViewKeyContext);
     const balancesDispatch = useContext(BalancesDispatchContext);
 
-    const [configs, setConfigs] = useState<Configs | null>(null)
+    const [configs, setConfigs] = useState<IConfigs | null>(null)
     const [currentRoundsState, setCurrentRoundsState] = useState<IRound | null>(null)
     const [currentRoundUserTickets, setCurrentRoundUserTickets] = useState<IUserTicket[] | null>(null)
+    const [stakingRewards, setStakingRewards] = useState<IStakingRewads | null>(null)
 
     const [isManualTickets, setIsManualTickets] = useState<boolean>(false);
     const [autoTicketsCount, setAutoTicketsCount] = useState<string>("0");
@@ -61,6 +64,7 @@ export default ({
             setInterval(() => {
                 getConfigsTrigger(client)
                 getPaginatedUserTicketsTrigger(client, viewkey, paginationValues.page, paginationValues.page_size)
+                
             }, 30000); // check 30 seconds
         }
     }, [client, viewkey])
@@ -68,6 +72,7 @@ export default ({
     useEffect(() => {
         if (client && viewkey && configs) {
             getCurrentRoundTrigger(client, viewkey, configs.current_round_number);
+            getRoundStakingRewardsTrigger(client, configs)
         }
     }, [configs])
 
@@ -90,6 +95,11 @@ export default ({
         const paginatedUserTickets = await getPaginatedUserTickets(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, viewkey, page - 1, page_size)
         setPaginatedUserTickets(paginatedUserTickets);
     }
+
+    const getRoundStakingRewardsTrigger = async (client: IClientState, configs: IConfigs) => {
+        const roundStakingRewards = await getRoundStakingRewards(client, configs.staking_contract.address, configs.staking_vk)
+        setStakingRewards(roundStakingRewards);
+    } 
 
     const getSEFIBalance = async () => {
         if (!client) return null
@@ -428,7 +438,7 @@ export default ({
                     (!currentRoundsState || !configs) && <i className="fa fa-spinner fa-spin" style={{ color: "white" }}></i>
                 }
                 {
-                    currentRoundsState && configs &&
+                    currentRoundsState && configs && stakingRewards &&
                     <Container fluid style={{ width: "80%" }}>
                         {
                             <Row>
@@ -436,9 +446,9 @@ export default ({
                                     <Row style={{ justifyContent: "center" }}>
                                         <span style={{ fontSize: "1.5rem", display: "block", marginBottom: "8px" }}>Prize Pot</span>
                                     </Row>
-                                    <Row style={{ justifyContent: "center" }}>
+                                    <Row style={{ justifyContent: "center" }}> 
                                         <span style={{ fontSize: "3rem", display: "block", marginBottom: "8px" }}>
-                                            {currentRoundsState && formatNumber(parseInt(currentRoundsState.running_pot_size) / 1000000)} SEFI
+                                            {currentRoundsState && formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) / 1000000)} SEFI
                                         </span>
                                     </Row>
                                     <div style={{ backgroundColor: "white", height: "1px", width: "100%", marginTop: "15px", marginBottom: "15px" }}>
@@ -499,25 +509,25 @@ export default ({
                                                         value={autoTicketsCount}
                                                         onChange={(e) => {
                                                             if (!e.target.value || e.target.value === "") setAutoTicketsCount("0")
-                                                            else if (parseInt(e.target.value) >= 200) setAutoTicketsCount("200")
+                                                            else if (parseInt(e.target.value) >= 400) setAutoTicketsCount("400")
                                                             else setAutoTicketsCount(e.target.value)
                                                         }} />
                                                     <button className="btn btn-dark" style={{ borderRadius: "0px", borderColor: "white" }} onClick={() => {
-                                                        if (parseInt(autoTicketsCount) >= 200) setAutoTicketsCount("200")
+                                                        if (parseInt(autoTicketsCount) >= 400) setAutoTicketsCount("400")
                                                         else setAutoTicketsCount("" + (parseInt(autoTicketsCount) + 1))
                                                     }}><i className="fas fa-plus"></i></button>
                                                 </div>
                                                 <div style={{ display: "flex", justifyContent: "center" }}>
                                                     <button className="btn btn-dark" style={{ margin: "5px", borderColor: "white" }} onClick={() => {
-                                                        if (parseInt(autoTicketsCount) + 5 >= 200) setAutoTicketsCount("200")
+                                                        if (parseInt(autoTicketsCount) + 5 >= 400) setAutoTicketsCount("400")
                                                         else setAutoTicketsCount("" + (parseInt(autoTicketsCount) + 5))
                                                     }}>+5</button>
                                                     <button className="btn btn-dark" style={{ margin: "5px", borderColor: "white" }} onClick={() => {
-                                                        if (parseInt(autoTicketsCount) + 10 >= 200) setAutoTicketsCount("200")
+                                                        if (parseInt(autoTicketsCount) + 10 >= 400) setAutoTicketsCount("400")
                                                         else setAutoTicketsCount("" + (parseInt(autoTicketsCount) + 10))
                                                     }}>+10</button>
                                                     <button className="btn btn-dark" style={{ margin: "5px", borderColor: "white" }} onClick={() => {
-                                                        if (parseInt(autoTicketsCount) + 25 >= 200) setAutoTicketsCount("200")
+                                                        if (parseInt(autoTicketsCount) + 25 >= 400) setAutoTicketsCount("400")
                                                         else setAutoTicketsCount("" + (parseInt(autoTicketsCount) + 25))
                                                     }}>+25</button>
                                                     <button className="btn btn-dark" style={{ margin: "5px", borderColor: "white" }} onClick={() => setAutoTicketsCount("" + ("0"))}>Reset</button>
@@ -605,6 +615,7 @@ export default ({
                                                         )
                                                         await getCurrentRoundTrigger(client, viewkey, configs.current_round_number);
                                                         await getPaginatedUserTicketsTrigger(client, viewkey, paginationValues.page, paginationValues.page_size)
+                                                        await getRoundStakingRewardsTrigger(client, configs)
                                                         await getSEFIBalance()
                                                         successNotification("Buy Tickets Success!")
 
@@ -662,7 +673,7 @@ export default ({
                                                     <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.sequence_6 * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_6 * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <Row>
@@ -675,7 +686,7 @@ export default ({
                                                     <i className="far fa-times-circle" style={{ margin: "5px", color: "#d9534f" }}></i>
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.sequence_5 * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_5 * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <Row>
@@ -688,7 +699,7 @@ export default ({
                                                     <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.sequence_4 * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_4 * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <Row>
@@ -701,7 +712,7 @@ export default ({
                                                     <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.sequence_3 * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_3 * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <Row>
@@ -714,7 +725,7 @@ export default ({
                                                     <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.sequence_2 * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_2 * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <Row>
@@ -727,7 +738,7 @@ export default ({
                                                     <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.sequence_1 * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_1 * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <br />
@@ -736,7 +747,7 @@ export default ({
                                                     <i className="fas fa-fire" style={{ margin: "2px", color: "#d9534f", marginLeft: "5px", marginRight: "10px" }}></i>Burn
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.burn * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.burn * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                             <Row style={{ marginBottom: "10px" }}>
@@ -744,7 +755,7 @@ export default ({
                                                     <i className="fas fa-coins" style={{ margin: "2px", color: "#f0ad4e", marginLeft: "5px", marginRight: "10px" }}></i>Triggerer Fee
                                                 </Col>
                                                 <Col style={{ textAlign: "left" }}>
-                                                    {`${formatNumber(parseInt(currentRoundsState.running_pot_size) * (currentRoundsState.round_reward_pot_allocations.triggerer * 0.01) / 1000000)} SEFI`}
+                                                    {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.triggerer * 0.01) / 1000000)} SEFI`}
                                                 </Col>
                                             </Row>
                                         </React.Fragment>

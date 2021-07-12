@@ -14,7 +14,8 @@ export default async (
 export interface IRound {
     round_number: number,
     round_ticket_price: string,
-    running_pot_size: string,
+    pending_staking_rewards: string,
+    staking_pot_size: string,
     ticket_count: number,
     round_reward_pot_allocations: {
         triggerer: number,
