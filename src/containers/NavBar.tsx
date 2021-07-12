@@ -8,7 +8,7 @@ import { ViewKeyContext, ViewKeyDispatchContext } from "../context/ViewKeyContex
 import { BalancesContext, BalancesDispatchContext } from "../context/BalancesContext";
 import formatNumber from "../utils/formatNumber";
 import createViewKey from "../api/createViewKey";
-import { errorNotification } from "../utils/notifications";
+import { errorNotification, successNotification } from "../utils/notifications";
 import { Modal, NavDropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import convertTosSCRT from "../api/convertTosSCRT";
@@ -189,7 +189,12 @@ export default ({
                                 <div className="col" style={{ padding: "3px" }}>
                                         <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
                                             onClick={async () => {
-                                                await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                                try {
+                                                    await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                                    successNotification("Trigger")
+                                                } catch (e) {
+                                                    errorNotification(e)
+                                                }
                                             } 
                                             }>
                                             {
