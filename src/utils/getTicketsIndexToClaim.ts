@@ -1,4 +1,5 @@
-import { IUserTicket } from "../api/getUserTickets";
+import { IUserTicket } from "../api/getUserRoundPaginatedTickets";
+
 
 export default (userTickets: IUserTicket[], ticketsToClaim: IUserTicket[]) => {
     let userTicketsModified:IUserTicket[] = JSON.parse(JSON.stringify([...userTickets]));

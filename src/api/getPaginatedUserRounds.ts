@@ -1,6 +1,5 @@
 import { IClientState } from "../context/ClientContext";
 import { IRound } from "./getRounds";
-import { IUserTicket } from "./getUserTickets";
 
 export default async (
     client: IClientState,

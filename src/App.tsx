@@ -10,7 +10,6 @@ import CreateViewkey from './containers/CreateViewkey';
 import ViewKeyContextProvider, { ViewKeyContext } from './context/ViewKeyContext';
 import BalancesContextProvices from './context/BalancesContext';
 import ConfigsContextProvider, { ConfigsContext } from './context/LotteryConfigsContext';
-import Home from './containers/Home';
 import {
   HashRouter as Router,
   Switch,
