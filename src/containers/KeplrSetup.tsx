@@ -45,8 +45,8 @@ const setupKeplr = async (setClient: any) => {
     await window.keplr.experimentalSuggestChain({
       chainId: constants.CHAIN_ID, 
       chainName: "Local Secret Chain",
-      rpc: "https://chainofsecrets.secrettestnet.io:26667",
-      rest: "https://chainofsecrets.secrettestnet.io",
+      rpc: "https://bootstrap.secrettestnet.io:26667" || "https://chainofsecrets.secrettestnet.io:26667",
+      rest: "https://bootstrap.secrettestnet.io" || "https://chainofsecrets.secrettestnet.io",
       bip44: {
         coinType: 529,
       },
@@ -96,7 +96,7 @@ const setupKeplr = async (setClient: any) => {
     const accounts = await keplrOfflineSigner.getAccounts();
 
     const execute = await new SigningCosmWasmClient(
-      "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
+      "https://bootstrap.secrettestnet.io" || "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
       accounts[0].address,
       window.getOfflineSigner(constants.CHAIN_ID),
       window.getEnigmaUtils(constants.CHAIN_ID),

@@ -17,7 +17,7 @@ export default async (client: IClientState, contractAddress: string) => {
     undefined,
     {
       amount: [{ amount: "500000", denom: "uscrt" }],
-      gas: "750000",
+      gas: "800000",
     }
   );
 

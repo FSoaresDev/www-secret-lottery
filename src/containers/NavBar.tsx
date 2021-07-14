@@ -192,6 +192,7 @@ export default ({
                                                 try {
                                                     await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
                                                     successNotification("Trigger")
+                                                    window.location.reload();
                                                 } catch (e) {
                                                     errorNotification(e)
                                                 }

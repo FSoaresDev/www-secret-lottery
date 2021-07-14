@@ -1,6 +1,10 @@
 # www-secret-lottery
 
 # TODO 
+
+    
+    
+
     * get queries after trigger
     * more loadings...
     * claim rewards = more gas efficient

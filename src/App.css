@@ -130,3 +130,27 @@ input[type=number] {
 .dropdown-toggle::after {
   display: none;
 }
+
+.dimmer {
+  background: rgba(252,249,243,0.7) !important
+}
+
+.modal-header {
+  background: rgb(14, 14, 16);
+  color: white
+}
+
+.modal-body {
+  background: rgb(14, 14, 16);
+  color: white
+}
+
+.close{
+  float: right;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: white;
+  text-shadow: 0 1px 0 #fff;
+  opacity: .85;
+}

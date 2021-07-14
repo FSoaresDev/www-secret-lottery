@@ -15,6 +15,7 @@ export default async (client: IClientState, tokenAddress: string, contractAddres
     let handleMsg = { send: {recipient: contractAddress, amount, msg} };
 
     let dynamicFees = 
+        tickets.length <= 5 ? feesAmount5Less : 
         tickets.length <= 25 ? feesAmount25Less : 
         tickets.length <= 50 ? feesAmount50Less : 
         tickets.length <= 75 ? feesAmount75Less : 
@@ -31,7 +32,11 @@ export default async (client: IClientState, tokenAddress: string, contractAddres
         tickets.length <= 350 ? feesAmount350Less : 
         tickets.length <= 375 ? feesAmount375Less : 
         tickets.length <= 400 ? feesAmount400Less : 
-        tickets.length > 400 ? feesAmount400More : undefined
+        tickets.length <= 425 ? feesAmount425Less : 
+        tickets.length <= 450 ? feesAmount450Less : 
+        tickets.length <= 475 ? feesAmount475Less : 
+        tickets.length <= 500 ? feesAmount500Less : 
+        tickets.length > 500 ? feesAmount500More : undefined
         
     const { transactionHash } = await client.execute.execute(tokenAddress, handleMsg,undefined,undefined,dynamicFees);
 
@@ -55,9 +60,13 @@ export default async (client: IClientState, tokenAddress: string, contractAddres
     }
 } 
 
+const feesAmount5Less = {
+    amount: [{ amount: "500000", denom: "uscrt" }],
+    gas: "1500000",
+}
 const feesAmount25Less = {
     amount: [{ amount: "500000", denom: "uscrt" }],
-    gas: "2000000",
+    gas: "2500000",
 }
 const feesAmount50Less = {
     amount: [{ amount: "500000", denom: "uscrt" }],
@@ -119,7 +128,23 @@ const feesAmount400Less = {
     amount: [{ amount: "500000", denom: "uscrt" }],
     gas: "21000000",
 }
-const feesAmount400More = {
+const feesAmount425Less = {
     amount: [{ amount: "500000", denom: "uscrt" }],
     gas: "22500000",
+}
+const feesAmount450Less = {
+    amount: [{ amount: "500000", denom: "uscrt" }],
+    gas: "23500000",
+}
+const feesAmount475Less = {
+    amount: [{ amount: "500000", denom: "uscrt" }],
+    gas: "24500000",
+}
+const feesAmount500Less = {
+    amount: [{ amount: "500000", denom: "uscrt" }],
+    gas: "25500000",
+}
+const feesAmount500More = {
+    amount: [{ amount: "500000", denom: "uscrt" }],
+    gas: "26500000",
 }

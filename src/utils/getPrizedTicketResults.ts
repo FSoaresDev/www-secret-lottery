@@ -1,4 +1,4 @@
-import { IUserTicket } from "../api/getUserTickets"
+import { IUserTicket } from "../api/getUserRoundPaginatedTickets"
 
 export default (draftedTicket: string, tickets: IUserTicket[]) => {
     let results: IPrizedTicketResults = {

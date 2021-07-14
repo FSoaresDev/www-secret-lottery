@@ -7,9 +7,9 @@ export default async (
     round_numbers: number[]
 ) => {
     try {
-        let queryMsg = { get_user_tickets: { address: client.accountData.address, key, round_numbers } };
+        let queryMsg = { get_user_rounds_ticket_count: { address: client.accountData.address, key, round_numbers } };
         const response = await client.execute.queryContractSmart(contractAddress, queryMsg);
-        const responseJSON =  JSON.parse(atob(response)).get_user_tickets
+        const responseJSON =  JSON.parse(atob(response)).get_user_rounds_ticket_count
         return responseJSON
     } catch (e){
         if(e.message.includes("User+VK not valid!")){
@@ -17,15 +17,7 @@ export default async (
             window.location.reload();
         }
         return {
-            user_tickets: []
+            user_rounds_ticket_count: []
         }
     }
-}
-
-export interface IUserTicket {
-    round_number: number,
-    ticket: string,
-    created_timestamp: number,
-    claimed_reward: boolean,
-    claimed_timestamp: number | null
 }
