@@ -73,13 +73,7 @@ export default ({
                                         {userRound.round_number}
                                     </td>
                                     <td style={{ display: "table-cell", verticalAlign: "middle" }}>
-                                        {userRound.round_end_block ? userRound.round_end_block : " - "
-                                                                /*<div>
-                                                                    {new Date(paginatedUserTickets.rounds[index].round_end_timestamp! * 1000).toISOString().split("T")[0]}
-                                                                    <br />
-                                                                    {new Date(paginatedUserTickets.rounds[index].round_end_timestamp! * 1000).toISOString().split("T")[1].split(".")[0]}
-                                                                </div> :
-                                                        " - "*/}
+                                        {}
                                     </td>
                                     <td style={{ display: "table-cell", verticalAlign: "middle" }}>
                                         {userRound.drafted_ticket ? userRound.drafted_ticket!.split('').join(' ') : " - "}

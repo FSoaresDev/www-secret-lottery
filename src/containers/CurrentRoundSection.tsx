@@ -127,7 +127,12 @@ export default ({
                         </Row>
 
                         <Row style={{ justifyContent: "center", fontSize: "1.25rem", marginTop: "10px" }}>
-                            <Countdown currentRoundsState={currentRoundsState} />
+                            {
+                                "Expected to End at: " + new Date(currentRoundsState.round_expected_end_timestamp*1000).toLocaleString()
+                            }
+                            {
+                                "Min Ticket Count: " + configs.min_ticket_count_per_round
+                            }
                         </Row>
                     </Col>
                     <Col style={{ borderRadius: "30px", border: "solid", marginLeft: "10px", marginRight: "10px" }}>
@@ -293,7 +298,7 @@ export default ({
                             configs &&
                             <React.Fragment>
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
@@ -302,11 +307,15 @@ export default ({
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_6 * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_6 * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_6 * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
@@ -315,11 +324,15 @@ export default ({
                                         <i className="far fa-times-circle" style={{ margin: "5px", color: "#d9534f" }}></i>
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_5 * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_5 * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_5 * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
@@ -328,11 +341,15 @@ export default ({
                                         <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_4 * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_4 * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_4 * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
@@ -341,11 +358,15 @@ export default ({
                                         <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_3 * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_3 * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_3 * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-times-circle" style={{ margin: "5px", color: "#d9534f" }}></i>
@@ -354,11 +375,15 @@ export default ({
                                         <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_2 * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_2 * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_2 * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="far fa-check-circle" style={{ margin: "5px", color: "#5cb85c" }}></i>
                                         <i className="far fa-times-circle" style={{ margin: "5px", color: "#d9534f" }}></i>
                                         <i className="far fa-circle" style={{ margin: "5px" }}></i>
@@ -367,24 +392,36 @@ export default ({
                                         <i className="far fa-circle" style={{ margin: "5px" }}></i>
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_1 * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_1 * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_1 * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <br />
                                 <Row>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="fas fa-fire" style={{ margin: "2px", color: "#d9534f", marginLeft: "5px", marginRight: "10px" }}></i>Burn
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.burn * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.burn * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.burn * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                                 <Row style={{ marginBottom: "10px" }}>
-                                    <Col xs={7}>
+                                    <Col xs={6}>
                                         <i className="fas fa-coins" style={{ margin: "2px", color: "#f0ad4e", marginLeft: "5px", marginRight: "10px" }}></i>Triggerer Fee
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
-                                        {`${formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.triggerer * 0.01) / 1000000)} SEFI`}
+                                        {
+                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.triggerer * 0.01) / 1000000) / (parseInt(currentRoundsState.round_ticket_price) / 1000000) * 100) / 100 }x 
+                                            (${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.triggerer * 0.01) / 1000000)* 100) / 100}
+                                            SEFI)`
+                                        }
                                     </Col>
                                 </Row>
                             </React.Fragment>

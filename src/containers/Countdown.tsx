@@ -11,7 +11,7 @@ export default ({currentRoundsState}: {currentRoundsState: IRound}) => {
 
   return (
     <div>
-      Round expected to End at {currentRoundsState.round_expected_end_block} Block
+      Round expected to End at {currentRoundsState.round_end_timestamp} Block
     </div>
     //<Countdown date={date} renderer={renderer} />
   ); 
