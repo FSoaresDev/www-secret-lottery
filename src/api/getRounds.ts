@@ -17,8 +17,10 @@ export interface IRound {
     pending_staking_rewards: string,
     staking_pot_size: string,
     ticket_count: number,
+    min_ticket_count: number,
     round_reward_pot_allocations: {
         triggerer: number,
+        reserve: number,
         burn: number,
         sequence_1: number,
         sequence_2: number,
@@ -38,6 +40,7 @@ export interface IRound {
 export interface IRoundRewardDistribution {
     triggerer_pot_size: string,
     burn_pot_size: string,
+    reserve_pot_size: string,
     sequence_1_pot_size: string,
     sequence_1_ticket_win_count: number,
     sequence_1_reward_per_ticket: string,

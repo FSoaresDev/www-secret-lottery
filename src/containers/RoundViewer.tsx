@@ -140,6 +140,10 @@ export default ({
                                 <i className="fas fa-coins" style={{ margin: "2px", color: "#f0ad4e", marginLeft: "5px", marginRight: "10px" }}></i>Triggerer Fee:
                                 <span>{" " + formatNumber(parseInt(roundViewer.reward_distribution ? roundViewer.reward_distribution.triggerer_pot_size : "0") / 1000000) + " SEFI"}</span>
                             </Col>
+                            <Col>
+                                <i className="fas fa-piggy-bank" style={{ margin: "2px", color: "#f0ad4e", marginLeft: "5px", marginRight: "10px" }}></i>Reserve:
+                                <span>{" " + formatNumber(parseInt(roundViewer.reward_distribution ? roundViewer.reward_distribution.reserve_pot_size : "0") / 1000000) + " SEFI"}</span>
+                            </Col>
                         </Row>
                     </Col>
                 </Row>
