@@ -14,6 +14,7 @@ import { ClientContext, IClientState } from "../context/ClientContext";
 import { ConfigsContext, ConfigsDispatchContext } from "../context/LotteryConfigsContext";
 import { ViewKeyContext } from "../context/ViewKeyContext";
 import calcBulkDiscountTicketPrice from "../utils/calcBulkDiscountTicketPrice";
+import calcPotSize from "../utils/calcPotSize";
 import calcTotalPotSize from "../utils/calcTotalPotSize";
 import formatNumber from "../utils/formatNumber";
 import generateRandomTickets from "../utils/generateRandomTickets";
@@ -136,7 +137,11 @@ export default ({
                             }
                             <br/>
                             {
-                                "Current Reserve: " + parseInt(configs.current_reserve_pot)/1000000 + " SEFI"
+                                "Initial Pot Size: " + parseInt(currentRoundsState.initial_pot_size)/1000000 + " SEFI"
+                            }
+                            <br/>
+                            {
+                                "Current Reserve : " + parseInt(configs.current_reserve_pot)/1000000 + " SEFI"
                             }
                         </Row>
                     </Col>
@@ -313,7 +318,7 @@ export default ({
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
                                         {
-                                            `${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_6 * 0.01) / 1000000)* 100) / 100}
+                                            ` ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence6) / 1000000 ) * 100 ) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_6}%)`
                                         }
                                     </Col>
@@ -330,7 +335,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             `
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_5 * 0.01) / 1000000)* 100) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence5) / 1000000 ) * 100 ) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_5}%)`
                                         }
                                     </Col>
@@ -347,7 +352,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_4 * 0.01) / 1000000)* 100) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence4) / 1000000 ) * 100 ) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_4}%)`
                                         }
                                     </Col>
@@ -364,7 +369,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             `
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_3 * 0.01) / 1000000)* 100) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence3) / 1000000 ) * 100 ) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_3}%)`
                                         }
                                     </Col>
@@ -381,7 +386,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             `
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_2 * 0.01) / 1000000)* 100) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence2) / 1000000 ) * 100 ) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_2}%)`
                                         }
                                     </Col>
@@ -398,7 +403,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.sequence_1 * 0.01) / 1000000)* 100) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence1) / 1000000 ) * 100 ) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_1}%)`
                                         }
                                     </Col>
@@ -411,7 +416,9 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.burn * 0.01) / 1000000)* 100) / 100}
+                                            ${
+                                                Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).burn) / 1000000 ) * 100 ) / 100
+                                            }
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.burn}%)`
                                         }
                                     </Col>
@@ -423,7 +430,10 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.triggerer * 0.01) / 1000000)* 100) / 100}
+                                            
+                                            ${
+                                                Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).triggerer) / 1000000 ) * 100 ) / 100
+                                            }
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.triggerer}%)`
                                         }
                                     </Col>
@@ -435,7 +445,9 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round(formatNumber(calcTotalPotSize(currentRoundsState, stakingRewards) * (currentRoundsState.round_reward_pot_allocations.reserve * 0.01) / 1000000)* 100) / 100}
+                                            ${
+                                                Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).reserve) / 1000000 ) * 100 ) / 100
+                                            }
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.reserve}%)`
                                         }
                                     </Col>

@@ -15,6 +15,7 @@ export interface IRound {
     round_number: number,
     round_ticket_price: string,
     pending_staking_rewards: string,
+    initial_pot_size: string,
     staking_pot_size: string,
     ticket_count: number,
     min_ticket_count: number,

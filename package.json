@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && cp -r build/* ../ThatRand0mUser.github.io/ && cd ../ThatRand0mUser.github.io && git add . && git commit -m 'update' && git push",
+    "build": "react-scripts build && cp -r build/* ../fsoaresdev.github.io/ && cd ../fsoaresdev.github.io && git add . && git commit -m 'update' && git push",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
