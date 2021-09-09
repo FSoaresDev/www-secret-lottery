@@ -2,5 +2,5 @@ export default {
     CHAIN_ID: "holodeck-2",
     SSCRT_CONTRACT_ADDRESS: "secret1s7c6xp9wltthk5r6mmavql4xld5me3g37guhsx",
     SEFI_CONTRACT_ADDRESS: "secret12q2c5s5we5zn9pq43l0rlsygtql6646my0sqfm",
-    SECRET_LOTTERY_CONTRACT_ADDRESS: "secret1q7xx3tafahtxnmfk2qp0pun09wrxlhx4vf7q52",
+    SECRET_LOTTERY_CONTRACT_ADDRESS: "secret1uwzjt6zmeq2etn4gjgs2m706hfmxy9re8zgjzh",
 } 
