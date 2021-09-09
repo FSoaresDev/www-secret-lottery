@@ -13,14 +13,14 @@ export default (
     const triggerer = newTokensOnRound * (currentRound.round_reward_pot_allocations.triggerer * 0.01)
     const reserve = newTokensOnRound * (currentRound.round_reward_pot_allocations.reserve * 0.01)
 
-    const sequence_pot = totalPotSize - burn - triggerer - reserve
+    //const sequence_pot = totalPotSize - burn - triggerer - reserve
 
-    const sequence1 = sequence_pot * (currentRound.round_reward_pot_allocations.sequence_1 * 0.01)
-    const sequence2 = sequence_pot * (currentRound.round_reward_pot_allocations.sequence_2 * 0.01)
-    const sequence3 = sequence_pot * (currentRound.round_reward_pot_allocations.sequence_3 * 0.01)
-    const sequence4 = sequence_pot * (currentRound.round_reward_pot_allocations.sequence_4 * 0.01)
-    const sequence5 = sequence_pot * (currentRound.round_reward_pot_allocations.sequence_5 * 0.01)
-    const sequence6 = sequence_pot * (currentRound.round_reward_pot_allocations.sequence_6 * 0.01)
+    const sequence1 = parseInt(currentRound.initial_sequence_pools.sequence_1) + newTokensOnRound * (currentRound.round_reward_pot_allocations.sequence_1 * 0.01)
+    const sequence2 = parseInt(currentRound.initial_sequence_pools.sequence_2) + newTokensOnRound * (currentRound.round_reward_pot_allocations.sequence_2 * 0.01)
+    const sequence3 = parseInt(currentRound.initial_sequence_pools.sequence_3) + newTokensOnRound * (currentRound.round_reward_pot_allocations.sequence_3 * 0.01)
+    const sequence4 = parseInt(currentRound.initial_sequence_pools.sequence_4) + newTokensOnRound * (currentRound.round_reward_pot_allocations.sequence_4 * 0.01)
+    const sequence5 = parseInt(currentRound.initial_sequence_pools.sequence_5) + newTokensOnRound * (currentRound.round_reward_pot_allocations.sequence_5 * 0.01)
+    const sequence6 = parseInt(currentRound.initial_sequence_pools.sequence_6) + newTokensOnRound * (currentRound.round_reward_pot_allocations.sequence_6 * 0.01)
 
     return {
         burn,
