@@ -20,7 +20,7 @@ export default async (client: IClientState, tokenAddress: string, contractAddres
         tickets.length <= 50 ? feesAmount50Less : 
         tickets.length <= 75 ? feesAmount75Less : 
         tickets.length <= 100 ? feesAmount100Less : 
-        tickets.length <= 100 ? feesAmount125Less : 
+        tickets.length <= 125 ? feesAmount125Less : 
         tickets.length <= 150 ? feesAmount150Less : 
         tickets.length <= 175 ? feesAmount175Less : 
         tickets.length <= 200 ? feesAmount200Less : 
