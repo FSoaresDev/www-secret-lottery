@@ -13,6 +13,7 @@ import { Modal, NavDropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import convertTosSCRT from "../api/convertTosSCRT";
 import triggerTestnet from "../api/triggerTestnet";
+import permitDetails from "../utils/permitDetails";
 
 export default ({
     menu
@@ -38,8 +39,70 @@ export default ({
                     viewkeyDispatchState(localStorage.getItem("SEFI_" + client.accountData.address))
                 }
             }
+            testPermits()
         }
     }, [client, menu])
+
+    const testPermits = async () => {
+        if (!client) return
+        // test permits
+        let permit = await permitDetails(client.accountData.address);
+        let res = await client.execute.queryContractSmart(
+            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+            {
+                with_permit: {
+                    query: { get_user_rounds_ticket_count: { round_numbers: [0] } },
+                    permit
+                },
+            }
+        );
+        console.log(res)
+
+        res = await client.execute.queryContractSmart(
+            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+            {
+                with_permit: {
+                    query: { get_paginated_user_rounds: { page: 0, page_size: 25 } },
+                    permit
+                },
+            }
+        );
+        console.log(res)
+
+        res = await client.execute.queryContractSmart(
+            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+            {
+                with_permit: {
+                    query: { get_user_round_paginated_tickets: { round_number: 0, page: 0, page_size: 25 } },
+                    permit
+                },
+            }
+        );
+        console.log(res)
+        /*let handleMsg = { revoke_permit: { permit_name: "secret_lottery" } };
+        const { transactionHash: transactionHash1 } = await client.execute.execute(
+            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+            handleMsg,
+            undefined,
+            undefined,
+            {
+                amount: [{ amount: "500000", denom: "uscrt" }],
+                gas: "1000000",
+            }
+        );
+        console.log(transactionHash1)
+        res = await client.execute.queryContractSmart(
+            constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
+            {
+                with_permit: {
+                    query: { get_user_round_paginated_tickets: { round_number: 0, page: 0, page_size: 25 } },
+                    permit
+                },
+            }
+        );
+        console.log(res)*/
+    }
+
 
     const getSEFIBalance = async () => {
         if (!client) return null
@@ -93,14 +156,14 @@ export default ({
                     <img style={{ maxHeight: "25px", marginRight: "10px", marginLeft: "10px" }} src={require("../assets/dice.png").default} />
                 </a>
                 <div className="navbar-nav">
-                        <h3 style={{
-                            color: "white",
-                            marginRight: "10px",
-                        }}>
-                            Secret Lottery
-                        </h3>
+                    <h3 style={{
+                        color: "white",
+                        marginRight: "10px",
+                    }}>
+                        Secret Lottery
+                    </h3>
                 </div>
-                
+
                 <div className="navbar-nav mr-auto">
 
                 </div>
@@ -131,7 +194,7 @@ export default ({
                                                     const sleep = (ms: number) => new Promise((accept) => setTimeout(accept, ms));
                                                     await sleep(1000);
                                                     getSEFIBalance()
-                                                } catch (e) {
+                                                } catch (e: any) {
                                                     errorNotification(e)
                                                 }
                                             }
@@ -154,23 +217,23 @@ export default ({
                                 </div>
                                 <div className="col" style={{ padding: "3px" }}>
                                     <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
-                                            disabled={loadingConvertTestnetSSCRT}
-                                            onClick={async () => {
-                                                try {
-                                                    setLoadingConvertTestnetSSCRT(true)
-                                                    await convertTosSCRT(client, constants.SSCRT_CONTRACT_ADDRESS)
-                                                    setLoadingConvertTestnetSSCRT(false)
-                                                } catch (e) {
-                                                    setLoadingConvertTestnetSSCRT(false)
-                                                }
+                                        disabled={loadingConvertTestnetSSCRT}
+                                        onClick={async () => {
+                                            try {
+                                                setLoadingConvertTestnetSSCRT(true)
+                                                await convertTosSCRT(client, constants.SSCRT_CONTRACT_ADDRESS)
+                                                setLoadingConvertTestnetSSCRT(false)
+                                            } catch (e) {
+                                                setLoadingConvertTestnetSSCRT(false)
                                             }
-                                            }>
-                                            {
-                                                loadingConvertTestnetSSCRT ?
-                                                    <i className="fa fa-spinner fa-spin"></i> :
-                                                    "Convert to sSCRT"
-                                            }
-                                        </button>
+                                        }
+                                        }>
+                                        {
+                                            loadingConvertTestnetSSCRT ?
+                                                <i className="fa fa-spinner fa-spin"></i> :
+                                                "Convert to sSCRT"
+                                        }
+                                    </button>
                                 </div>
                                 {
                                     menu === "SEFI" &&
@@ -187,21 +250,21 @@ export default ({
                                     </div>
                                 }
                                 <div className="col" style={{ padding: "3px" }}>
-                                        <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
-                                            onClick={async () => {
-                                                try {
-                                                    await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
-                                                    successNotification("Trigger")
-                                                    window.location.reload();
-                                                } catch (e) {
-                                                    errorNotification(e)
-                                                }
-                                            } 
-                                            }>
-                                            {
-                                                "Trigger"
+                                    <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
+                                        onClick={async () => {
+                                            try {
+                                                await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                                successNotification("Trigger")
+                                                window.location.reload();
+                                            } catch (e: any) {
+                                                errorNotification(e)
                                             }
-                                        </button>
+                                        }
+                                        }>
+                                        {
+                                            "Trigger"
+                                        }
+                                    </button>
                                 </div>
                             </div>
 

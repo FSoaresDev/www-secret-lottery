@@ -1,25 +1,26 @@
 import { Dispatch, useContext, useEffect } from "react";
 import { BroadcastMode, SigningCosmWasmClient } from "secretjs";
 import constants from "../constants";
-import {ClientDispatchContext} from "../context/ClientContext"
+import { ClientDispatchContext } from "../context/ClientContext"
+import permitDetails from "../utils/permitDetails";
 
 export default () => {
-    const clientDispatchState = useContext(ClientDispatchContext);
+  const clientDispatchState = useContext(ClientDispatchContext);
 
-    useEffect(() => {
-        setupKeplr(clientDispatchState);
-    }, [])
+  useEffect(() => {
+    setupKeplr(clientDispatchState);
+  }, [])
 
-    return null
+  return null
 }
 
-export 
+export
 
- 
-const setupKeplr = async (setClient: any) => {
+
+  const setupKeplr = async (setClient: any) => {
     // Define sleep 
     const sleep = (ms: number) => new Promise((accept) => setTimeout(accept, ms));
-  
+
     // Wait for Keplr to be injected to the page
     while (
       !window.keplr &&
@@ -28,7 +29,7 @@ const setupKeplr = async (setClient: any) => {
     ) {
       await sleep(10);
     }
-  
+
     // Use a custom chain with Keplr.
     // On mainnet we don't need this (`experimentalSuggestChain`).
     // This works well with `enigmampc/secret-network-sw-dev`:
@@ -43,10 +44,10 @@ const setupKeplr = async (setClient: any) => {
     //     4. chainName = Whatever you like
     // For more examples, go to: https://github.com/chainapsis/keplr-example/blob/master/src/main.js
     await window.keplr.experimentalSuggestChain({
-      chainId: constants.CHAIN_ID, 
+      chainId: constants.CHAIN_ID,
       chainName: "Local Secret Chain",
-      rpc: "https://bootstrap.secrettestnet.io:26667" || "https://chainofsecrets.secrettestnet.io:26667",
-      rest: "https://bootstrap.secrettestnet.io" || "https://chainofsecrets.secrettestnet.io",
+      rpc: "https://chainofsecrets.secrettestnet.io:26667",
+      rest: "https://chainofsecrets.secrettestnet.io",
       bip44: {
         coinType: 529,
       },
@@ -85,18 +86,18 @@ const setupKeplr = async (setClient: any) => {
       },
       features: ["secretwasm"],
     });
-  
+
     // Enable Keplr.
     // This pops-up a window for the user to allow keplr access to the webpage.
     await window.keplr.enable(constants.CHAIN_ID);
-  
+
     // Setup SecrtJS with Keplr's OfflineSigner
     // This pops-up a window for the user to sign on each tx we sent
     const keplrOfflineSigner = window.getOfflineSigner(constants.CHAIN_ID);
     const accounts = await keplrOfflineSigner.getAccounts();
 
     const execute = await new SigningCosmWasmClient(
-      "https://bootstrap.secrettestnet.io" || "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
+      "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
       accounts[0].address,
       window.getOfflineSigner(constants.CHAIN_ID),
       window.getEnigmaUtils(constants.CHAIN_ID),
@@ -114,11 +115,11 @@ const setupKeplr = async (setClient: any) => {
       },
       BroadcastMode.Sync
     )
-  
+
     const accountData = await execute.getAccount(accounts[0].address);
-  
+
     if (!accountData) return
-  
+
     setClient({
       execute,
       accountData: {
@@ -126,8 +127,9 @@ const setupKeplr = async (setClient: any) => {
         balance: accountData.balance[0].amount
       }
     })
+
   }
-  
-  declare global {
-    interface Window { keplr: any, getOfflineSigner: any, getEnigmaUtils: any }
-  }
+
+declare global {
+  interface Window { keplr: any, getOfflineSigner: any, getEnigmaUtils: any }
+}
