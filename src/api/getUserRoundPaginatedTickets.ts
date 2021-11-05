@@ -3,18 +3,27 @@ import { IClientState } from "../context/ClientContext";
 export default async (
     client: IClientState,
     contractAddress: string,
-    key: string,
+    permit: any,
     round_number: number,
     page: number,
     page_size: number
 ) => {
     try {
-        let queryMsg = { get_user_round_paginated_tickets: { address: client.accountData.address, key, round_number, page, page_size } };
+        let queryMsg = {
+            with_permit: {
+                query: { get_user_round_paginated_tickets: { round_number, page, page_size } },
+                permit
+            },
+
+        };
+        console.log(queryMsg)
         const response = await client.execute.queryContractSmart(contractAddress, queryMsg);
-        const responseJSON =  JSON.parse(atob(response)).get_user_round_paginated_tickets
-        return responseJSON
-    } catch (e){
-        if(e.message.includes("User+VK not valid!")){
+        console.log(response)
+        return response.get_user_round_paginated_tickets
+        //const responseJSON = JSON.parse(atob(response)).get_user_round_paginated_tickets
+        //return responseJSON
+    } catch (e: any) {
+        if (e.message.includes("User+VK not valid!")) {
             localStorage.clear();
             window.location.reload();
         }

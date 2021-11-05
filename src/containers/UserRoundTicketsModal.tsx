@@ -7,6 +7,7 @@ import getUserRoundPaginatedTickets, { IUserTicket } from "../api/getUserRoundPa
 import constants from "../constants";
 import { BalancesDispatchContext } from "../context/BalancesContext";
 import { ClientContext, IClientState } from "../context/ClientContext";
+import { PermitContext } from "../context/PermitContext";
 import { ViewKeyContext } from "../context/ViewKeyContext";
 import formatNumber from "../utils/formatNumber";
 import getPrizedTicketResults, { IPrizedTicketResults } from "../utils/getPrizedTicketResults";
@@ -22,30 +23,30 @@ export default ({
     setUserRoundTicketsModal: Dispatch<{ show: boolean, selectedUserRound: IRound | null, userTicketsCount: number | null }>
 }) => {
     const client = useContext(ClientContext);
-    const viewkey = useContext(ViewKeyContext);
+    const permit = useContext(PermitContext);
     const balancesDispatch = useContext(BalancesDispatchContext);
-    
+
     const ticketPageSize = 500;
     const [userRoundTickets, setUserRoundTickets] = useState<IUserTicket[] | null>(null)
     const [loadingClaimReward, setLoadingClaimReward] = useState<boolean>(false)
 
     useEffect(() => {
-        if (client && viewkey && userRoundTicketsModal.selectedUserRound && userRoundTicketsModal.userTicketsCount) {
+        if (client && permit && userRoundTicketsModal.selectedUserRound && userRoundTicketsModal.userTicketsCount) {
             setUserRoundTickets(null)
-            getUserRoundPaginatedTicketsTrigger(client, viewkey, userRoundTicketsModal.selectedUserRound, userRoundTicketsModal.userTicketsCount)
+            getUserRoundPaginatedTicketsTrigger(client, permit, userRoundTicketsModal.selectedUserRound, userRoundTicketsModal.userTicketsCount)
         }
     }, [userRoundTicketsModal])
 
-    const getUserRoundPaginatedTicketsTrigger = async (client: IClientState, viewkey: string, round: IRound, userTicketsCount: number) => {
+    const getUserRoundPaginatedTicketsTrigger = async (client: IClientState, permit: any, round: IRound, userTicketsCount: number) => {
         // To get all the tickets depending on the amount of tickets, we will section this by the max size of each request
         const requestsNumber = Math.ceil(userTicketsCount / ticketPageSize);
         let allTickets: IUserTicket[] = [];
         for (var i = 0; i < requestsNumber; i++) {
-            const response = await getUserRoundPaginatedTickets(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, viewkey, round.round_number, i, ticketPageSize)
+            const response = await getUserRoundPaginatedTickets(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, permit, round.round_number, i, ticketPageSize)
             allTickets = allTickets.concat(response.user_round_paginated_tickets)
         }
         setUserRoundTickets(allTickets)
-    } 
+    }
 
     const getSEFIBalance = async () => {
         if (!client) return null
@@ -56,7 +57,7 @@ export default ({
             SEFI: response
         })
     }
-    
+
     const calcTotalRewards = (draftedTicket: string, tickets: IUserTicket[], round: IRound) => {
         if (!round.reward_distribution) return 0
 
@@ -146,7 +147,7 @@ export default ({
     }
 
     const claimButtonLogic = async (round: IRound, userRoundTickets: IUserTicket[]) => {
-        if (!client || !viewkey || !userRoundTicketsModal.selectedUserRound || !userRoundTicketsModal.userTicketsCount) return
+        if (!client || !permit || !userRoundTicketsModal.selectedUserRound || !userRoundTicketsModal.userTicketsCount) return
         setLoadingClaimReward(true)
         try {
             let ticketIndexes: number[] = [];
@@ -162,12 +163,12 @@ export default ({
                 ticketIndexes
             );
 
-            await getUserRoundPaginatedTicketsTrigger(client, viewkey, userRoundTicketsModal.selectedUserRound, userRoundTicketsModal.userTicketsCount)
+            await getUserRoundPaginatedTicketsTrigger(client, permit, userRoundTicketsModal.selectedUserRound, userRoundTicketsModal.userTicketsCount)
             await getSEFIBalance()
 
             setLoadingClaimReward(false)
         }
-        catch (e) {
+        catch (e: any) {
             errorNotification(e)
             setLoadingClaimReward(false)
         }
@@ -199,14 +200,14 @@ export default ({
                 if (round.drafted_ticket) {
                     ticketPrizes = getPrizedTicketResults(round.drafted_ticket, [userTicket])
                     accumutatedTicketRewards = getPrizeValueFromTicket(round, ticketPrizes);
-                    
-                    if (ticketPrizes.sequence_6.length) ticketSequence = "Matched 6 Sequence" 
-                    else if (ticketPrizes.sequence_5.length) ticketSequence = "Matched 5 Sequence" 
-                    else if (ticketPrizes.sequence_4.length) ticketSequence = "Matched 4 Sequence" 
-                    else if (ticketPrizes.sequence_3.length) ticketSequence = "Matched 3 Sequence" 
-                    else if (ticketPrizes.sequence_2.length) ticketSequence = "Matched 2 Sequence" 
-                    else if (ticketPrizes.sequence_1.length) ticketSequence = "Matched 1 Sequence" 
-                    else ticketSequence = "Matched 0 Sequence" 
+
+                    if (ticketPrizes.sequence_6.length) ticketSequence = "Matched 6 Sequence"
+                    else if (ticketPrizes.sequence_5.length) ticketSequence = "Matched 5 Sequence"
+                    else if (ticketPrizes.sequence_4.length) ticketSequence = "Matched 4 Sequence"
+                    else if (ticketPrizes.sequence_3.length) ticketSequence = "Matched 3 Sequence"
+                    else if (ticketPrizes.sequence_2.length) ticketSequence = "Matched 2 Sequence"
+                    else if (ticketPrizes.sequence_1.length) ticketSequence = "Matched 1 Sequence"
+                    else ticketSequence = "Matched 0 Sequence"
                 }
 
                 return (
@@ -219,7 +220,7 @@ export default ({
                                         <Popover.Content>
                                             <div>
                                                 {ticketSequence}
-                                                <br/>
+                                                <br />
                                                 {"Ticket Rewards: " + (accumutatedTicketRewards ? formatNumber(accumutatedTicketRewards! / 1000000) : 0) + " SEFI"}
                                             </div>
                                         </Popover.Content>
@@ -253,7 +254,7 @@ export default ({
         let winTicketsCount = null
         let remainingRewardTickets = null
 
-        
+
         if (userRoundTickets && round.drafted_ticket) {
             remainingRewardTickets = remainingToClaimTickets(round.drafted_ticket, userRoundTickets, round)
             winTicketsCount = getWinningTicketsCount(round.drafted_ticket, userRoundTickets)
@@ -274,26 +275,26 @@ export default ({
                             <Row>Your Winning Tickets: {winTicketsCount ? winTicketsCount : " - "}</Row>
                             {
                                 userRoundTickets && remainingRewardTickets &&
-                                    <Row>
-                                        {
-                                            remainingRewardTickets.remainingPrizeToClaim > 0 ?
-                                                <button className="btn btn-success"
-                                                    disabled={loadingClaimReward}
-                                                    onClick={async () => {
-                                                        claimButtonLogic(round, userRoundTickets);
-                                                    }}>
-                                                    {
-                                                        loadingClaimReward ?
-                                                            <i className="fa fa-spinner fa-spin"></i> :
-                                                            `Claim ${formatNumber(remainingToClaimTickets(round.drafted_ticket!, userRoundTickets, round).remainingPrizeToClaim / 1000000)} SEFI`
-                                                    }
-                                                </button>
-                                                :
-                                                calcTotalRewards(round.drafted_ticket!, userRoundTickets, round) > 0 ?
-                                                    "Claimed " + formatNumber(calcTotalRewards(round.drafted_ticket!, userRoundTickets, round) / 1000000) + " SEFI" :
-                                                    " - "
-                                        }
-                                    </Row>
+                                <Row>
+                                    {
+                                        remainingRewardTickets.remainingPrizeToClaim > 0 ?
+                                            <button className="btn btn-success"
+                                                disabled={loadingClaimReward}
+                                                onClick={async () => {
+                                                    claimButtonLogic(round, userRoundTickets);
+                                                }}>
+                                                {
+                                                    loadingClaimReward ?
+                                                        <i className="fa fa-spinner fa-spin"></i> :
+                                                        `Claim ${formatNumber(remainingToClaimTickets(round.drafted_ticket!, userRoundTickets, round).remainingPrizeToClaim / 1000000)} SEFI`
+                                                }
+                                            </button>
+                                            :
+                                            calcTotalRewards(round.drafted_ticket!, userRoundTickets, round) > 0 ?
+                                                "Claimed " + formatNumber(calcTotalRewards(round.drafted_ticket!, userRoundTickets, round) / 1000000) + " SEFI" :
+                                                " - "
+                                    }
+                                </Row>
                             }
                         </Col>
                     </Row>

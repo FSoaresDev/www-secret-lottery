@@ -12,6 +12,7 @@ import constants from "../constants";
 import { BalancesDispatchContext } from "../context/BalancesContext";
 import { ClientContext, IClientState } from "../context/ClientContext";
 import { ConfigsContext, ConfigsDispatchContext } from "../context/LotteryConfigsContext";
+import { PermitContext } from "../context/PermitContext";
 import { ViewKeyContext } from "../context/ViewKeyContext";
 import calcBulkDiscountTicketPrice from "../utils/calcBulkDiscountTicketPrice";
 import calcPotSize from "../utils/calcPotSize";
@@ -33,7 +34,8 @@ export default ({
 }
 ) => {
     const client = useContext(ClientContext);
-    const viewkey = useContext(ViewKeyContext);
+    //const viewkey = useContext(ViewKeyContext);
+    const permit = useContext(PermitContext);
     const balancesDispatch = useContext(BalancesDispatchContext);
     const configs = useContext(ConfigsContext);
     const configsDispatch = useContext(ConfigsDispatchContext);
@@ -48,17 +50,17 @@ export default ({
     const [manualTickets, setManualTickets] = useState<string[]>([]);
 
     useEffect(() => {
-        if (client && viewkey) {
+        if (client) {
             getConfigsTrigger(client)
             setInterval(() => {
                 getConfigsTrigger(client)
             }, 30000); // check 30 seconds
         }
-    }, [client, viewkey])
+    }, [client])
 
     useEffect(() => {
-        if (client && viewkey && configs) {
-            getCurrentRoundTrigger(client, viewkey, configs.current_round_number);
+        if (client && configs) {
+            getCurrentRoundTrigger(client, permit, configs.current_round_number);
             getRoundStakingRewardsTrigger(client, configs)
         }
     }, [configs])
@@ -68,9 +70,9 @@ export default ({
         configsDispatch(configs)
     }
 
-    const getCurrentRoundTrigger = async (client: IClientState, viewkey: string, current_round: number) => {
+    const getCurrentRoundTrigger = async (client: IClientState, permit: any, current_round: number) => {
         const currentRoundPromise = getRounds(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, [current_round])
-        const currentRoundUserTicketsCountPromise = getUserRoundsTicketCount(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, viewkey, [current_round]);
+        const currentRoundUserTicketsCountPromise = getUserRoundsTicketCount(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, permit, [current_round]);
 
         const [currentRound, currentRoundUserTicketsCount] = await Promise.all([currentRoundPromise, currentRoundUserTicketsCountPromise]);
 
@@ -98,7 +100,7 @@ export default ({
             <i className="fa fa-spinner fa-spin" style={{ color: "white" }}></i>
         </div>
     )
-    if (!viewkey) return null
+    if (!permit) return null
     return (
         <React.Fragment>
             {
@@ -129,19 +131,19 @@ export default ({
 
                         <Row style={{ justifyContent: "center", fontSize: "1.25rem", marginTop: "10px" }}>
                             {
-                                "Expected to End at: " + new Date(currentRoundsState.round_expected_end_timestamp*1000).toLocaleString()
+                                "Expected to End at: " + new Date(currentRoundsState.round_expected_end_timestamp * 1000).toLocaleString()
                             }
-                            <br/>
+                            <br />
                             {
                                 "Min Ticket Count: " + currentRoundsState.min_ticket_count
                             }
-                            <br/>
+                            <br />
                             {
-                                "Initial Pot Size: " + parseInt(currentRoundsState.initial_pot_size)/1000000 + " SEFI"
+                                "Initial Pot Size: " + parseInt(currentRoundsState.initial_pot_size) / 1000000 + " SEFI"
                             }
-                            <br/>
+                            <br />
                             {
-                                "Current Reserve : " + parseInt(configs.current_reserve_pot)/1000000 + " SEFI"
+                                "Current Reserve : " + parseInt(configs.current_reserve_pot) / 1000000 + " SEFI"
                             }
                         </Row>
                     </Col>
@@ -257,8 +259,8 @@ export default ({
                                                 ticketPrice
                                             )
                                             await getRoundStakingRewardsTrigger(client, configs)
-                                            await getCurrentRoundTrigger(client, viewkey, configs.current_round_number);
-                                            await getPaginatedUserTicketsTrigger(client, viewkey, paginationValues.page, paginationValues.page_size)
+                                            await getCurrentRoundTrigger(client, permit, configs.current_round_number);
+                                            await getPaginatedUserTicketsTrigger(client, permit, paginationValues.page, paginationValues.page_size)
                                             await getSEFIBalance()
                                             successNotification("Buy Tickets Success!")
 
@@ -318,7 +320,7 @@ export default ({
                                     </Col>
                                     <Col style={{ textAlign: "left" }}>
                                         {
-                                            ` ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence6) / 1000000 ) * 100 ) / 100}
+                                            ` ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence6) / 1000000) * 100) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_6}%)`
                                         }
                                     </Col>
@@ -335,7 +337,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             `
-                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence5) / 1000000 ) * 100 ) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence5) / 1000000) * 100) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_5}%)`
                                         }
                                     </Col>
@@ -352,7 +354,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence4) / 1000000 ) * 100 ) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence4) / 1000000) * 100) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_4}%)`
                                         }
                                     </Col>
@@ -369,7 +371,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             `
-                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence3) / 1000000 ) * 100 ) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence3) / 1000000) * 100) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_3}%)`
                                         }
                                     </Col>
@@ -386,7 +388,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             `
-                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence2) / 1000000 ) * 100 ) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence2) / 1000000) * 100) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_2}%)`
                                         }
                                     </Col>
@@ -403,7 +405,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence1) / 1000000 ) * 100 ) / 100}
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).sequence1) / 1000000) * 100) / 100}
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.sequence_1}%)`
                                         }
                                     </Col>
@@ -416,8 +418,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${
-                                                Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).burn) / 1000000 ) * 100 ) / 100
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).burn) / 1000000) * 100) / 100
                                             }
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.burn}%)`
                                         }
@@ -431,8 +432,7 @@ export default ({
                                         {
                                             ` 
                                             
-                                            ${
-                                                Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).triggerer) / 1000000 ) * 100 ) / 100
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).triggerer) / 1000000) * 100) / 100
                                             }
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.triggerer}%)`
                                         }
@@ -445,8 +445,7 @@ export default ({
                                     <Col style={{ textAlign: "left" }}>
                                         {
                                             ` 
-                                            ${
-                                                Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).reserve) / 1000000 ) * 100 ) / 100
+                                            ${Math.round((formatNumber(calcPotSize(currentRoundsState, stakingRewards).reserve) / 1000000) * 100) / 100
                                             }
                                             SEFI (${currentRoundsState.round_reward_pot_allocations.reserve}%)`
                                         }

@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import convertTosSCRT from "../api/convertTosSCRT";
 import triggerTestnet from "../api/triggerTestnet";
 import permitDetails from "../utils/permitDetails";
+import { PermitContext, PermitDispatchContext } from "../context/PermitContext";
 
 export default ({
     menu
@@ -23,6 +24,8 @@ export default ({
     const client = useContext(ClientContext);
     const viewkey = useContext(ViewKeyContext);
     const viewkeyDispatchState = useContext(ViewKeyDispatchContext);
+    const permit = useContext(PermitContext);
+    const permitDispatchState = useContext(PermitDispatchContext)
     const balances = useContext(BalancesContext);
     const balancesDispatch = useContext(BalancesDispatchContext);
     const [loadingConvertTestnetSSCRT, setLoadingConvertTestnetSSCRT] = useState<boolean>(false)
@@ -32,16 +35,23 @@ export default ({
     useEffect(() => {
         if (client) {
             viewkeyDispatchState(null);
-
+            getPermit()
             if (menu === "SEFI") {
                 getSEFIBalance()
                 if (localStorage.getItem("SEFI_" + client.accountData.address)) {
                     viewkeyDispatchState(localStorage.getItem("SEFI_" + client.accountData.address))
                 }
             }
-            testPermits()
+            //testPermits()
         }
     }, [client, menu])
+
+    const getPermit = async () => {
+        if (!client) return
+        let permit = await permitDetails(client.accountData.address);
+        permitDispatchState(permit)
+    }
+
 
     const testPermits = async () => {
         if (!client) return
@@ -62,7 +72,7 @@ export default ({
             constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
             {
                 with_permit: {
-                    query: { get_paginated_user_rounds: { page: 0, page_size: 25 } },
+                    query: { get_paginated_user_rounds: { page: 0, page_size: 1000 } },
                     permit
                 },
             }
@@ -73,7 +83,7 @@ export default ({
             constants.SECRET_LOTTERY_CONTRACT_ADDRESS,
             {
                 with_permit: {
-                    query: { get_user_round_paginated_tickets: { round_number: 0, page: 0, page_size: 25 } },
+                    query: { get_user_round_paginated_tickets: { round_number: 0, page: 0, page_size: 1000 } },
                     permit
                 },
             }
@@ -116,7 +126,7 @@ export default ({
     }
 
     const renderViewKey = () => {
-        if (client && viewkey) {
+        if (client) {
             return (
                 <div style={{ padding: "8px 13px", borderRadius: "10px", marginRight: "10px" }}
                     onClick={() => setRemoveVKModalShow(true)}
@@ -273,7 +283,7 @@ export default ({
                 }
             </nav>
             {
-                client &&
+                /*client &&
                 <RemoveVKModal
                     menu={menu}
                     client={client}
@@ -281,7 +291,7 @@ export default ({
                     viewkeyDispatchState={viewkeyDispatchState}
                     removeVKModalShow={removeVKModalShow}
                     setRemoveVKModalShow={setRemoveVKModalShow}
-                />
+                />*/
             }
         </React.Fragment>
     )

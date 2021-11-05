@@ -3,6 +3,7 @@ import getPaginatedUserRounds, { IPaginatedUserRounds } from "../api/getPaginate
 import { IRound } from "../api/getRounds";
 import constants from "../constants";
 import { ClientContext, IClientState } from "../context/ClientContext";
+import { PermitContext } from "../context/PermitContext";
 import { ViewKeyContext } from "../context/ViewKeyContext";
 import UserRoundTicketsModal from "./UserRoundTicketsModal";
 
@@ -21,7 +22,7 @@ export default ({
     setRoundViewer: Dispatch<IRound | null>
 }) => {
     const client = useContext(ClientContext);
-    const viewkey = useContext(ViewKeyContext);
+    const permit = useContext(PermitContext);
 
     const [userRoundTicketsModal, setUserRoundTicketsModal] = useState<{ show: boolean, selectedUserRound: IRound | null, userTicketsCount: number | null }>({
         show: false,
@@ -31,12 +32,12 @@ export default ({
 
 
     useEffect(() => {
-        if (client && viewkey) {
-            getPaginatedUserTicketsTrigger(client, viewkey, paginationValues.page, paginationValues.page_size)
+        if (client && permit) {
+            getPaginatedUserTicketsTrigger(client, permit, paginationValues.page, paginationValues.page_size)
         }
-    }, [client, viewkey])
+    }, [client, permit])
 
-    if (!client || !viewkey || !paginatedUserRounds) return null
+    if (!client || !permit || !paginatedUserRounds) return null
     return (
         <React.Fragment>
             <div className="row" style={{ justifyContent: "center", margin: "0px" }}>
@@ -73,15 +74,15 @@ export default ({
                                         {userRound.round_number}
                                     </td>
                                     <td style={{ display: "table-cell", verticalAlign: "middle" }}>
-                                        {}
+                                        { }
                                     </td>
                                     <td style={{ display: "table-cell", verticalAlign: "middle" }}>
                                         {userRound.drafted_ticket ? userRound.drafted_ticket!.split('').join(' ') : " - "}
                                     </td>
                                     <td style={{ display: "table-cell", verticalAlign: "middle" }}>
                                         {
-                                            <button className={`btn btn-info`} onClick={() => setUserRoundTicketsModal({show: true, selectedUserRound: userRound, userTicketsCount: paginatedUserRounds.user_tickets_count[index]})}>
-                                                 {paginatedUserRounds.user_tickets_count[index] + " Tickets"}
+                                            <button className={`btn btn-info`} onClick={() => setUserRoundTicketsModal({ show: true, selectedUserRound: userRound, userTicketsCount: paginatedUserRounds.user_tickets_count[index] })}>
+                                                {paginatedUserRounds.user_tickets_count[index] + " Tickets"}
                                             </button>
                                         }
                                     </td>
@@ -92,7 +93,7 @@ export default ({
                 </tbody>
             </table>
 
-            <UserRoundTicketsModal 
+            <UserRoundTicketsModal
                 userRoundTicketsModal={userRoundTicketsModal}
                 setUserRoundTicketsModal={setUserRoundTicketsModal}
             />

@@ -24,6 +24,7 @@ import getPaginatedUserRounds, { IPaginatedUserRounds } from './api/getPaginated
 import constants from './constants';
 import RoundViewer from './containers/RoundViewer';
 import { IRound } from './api/getRounds';
+import PermitContextProvider from './context/PermitContext';
 
 function App() {
   const [roundViewer, setRoundViewer] = useState<IRound | null>(null);
@@ -36,8 +37,8 @@ function App() {
     page: 1
   })
 
-  const getPaginatedUserTicketsTrigger = async (client: IClientState, viewkey: string, page: number, page_size: number) => {
-    const paginatedUserTickets = await getPaginatedUserRounds(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, viewkey, page - 1, page_size)
+  const getPaginatedUserTicketsTrigger = async (client: IClientState, permit: any, page: number, page_size: number) => {
+    const paginatedUserTickets = await getPaginatedUserRounds(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS, permit, page - 1, page_size)
     setPaginatedUserRounds(paginatedUserTickets);
   }
 
@@ -47,7 +48,7 @@ function App() {
         <Switch>
           <Route path="/">
             <ClientContextProvider>
-              <ViewKeyContextProvider>
+              <PermitContextProvider>
                 <BalancesContextProvices>
                   <ConfigsContextProvider>
                     <div style={{ background: "linear-gradient(180deg, #242525 0%, #000 180%)", width: "100%", minHeight: "100vh" }}>
@@ -55,7 +56,9 @@ function App() {
                       <KeplrSetup />
                       <NavBar menu={"SEFI"} />
                       <Container fluid style={{ width: "80%", color: "white" }}>
-                        <CreateViewkey menu={"SEFI"} />
+                        {
+                          //<CreateViewkey menu={"SEFI"} />
+                        }
                         <Row>
                           <CurrentRoundSection
                             getPaginatedUserTicketsTrigger={getPaginatedUserTicketsTrigger}
@@ -76,20 +79,20 @@ function App() {
                             />
                           </Col>
                           <Col style={{ justifyContent: "center", marginLeft: "50px" }}>
-                              <RoundViewer 
-                                roundViewer={roundViewer}
-                                setRoundViewer={setRoundViewer}
-                              /> 
+                            <RoundViewer
+                              roundViewer={roundViewer}
+                              setRoundViewer={setRoundViewer}
+                            />
                           </Col>
-                        </Row> 
+                        </Row>
                       </Container>
-                      { 
+                      {
                         //<Home menu={"SEFI"}/>
                       }
                     </div>
                   </ConfigsContextProvider>
                 </BalancesContextProvices>
-              </ViewKeyContextProvider>
+              </PermitContextProvider>
             </ClientContextProvider>
           </Route>
         </Switch>
