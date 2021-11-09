@@ -12,7 +12,7 @@ import { errorNotification, successNotification } from "../utils/notifications";
 import { Modal, NavDropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import convertTosSCRT from "../api/convertTosSCRT";
-import triggerTestnet from "../api/triggerTestnet";
+import { trigger1, trigger2, triggerExtend } from "../api/triggerTestnet";
 import permitDetails from "../utils/permitDetails";
 import { PermitContext, PermitDispatchContext } from "../context/PermitContext";
 
@@ -263,7 +263,7 @@ export default ({
                                     <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
                                         onClick={async () => {
                                             try {
-                                                await triggerTestnet(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                                await trigger1(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
                                                 successNotification("Trigger")
                                                 window.location.reload();
                                             } catch (e: any) {
@@ -272,7 +272,41 @@ export default ({
                                         }
                                         }>
                                         {
-                                            "Trigger"
+                                            "Trigger1"
+                                        }
+                                    </button>
+                                </div>
+                                <div className="col" style={{ padding: "3px" }}>
+                                    <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
+                                        onClick={async () => {
+                                            try {
+                                                await trigger2(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                                successNotification("Trigger")
+                                                window.location.reload();
+                                            } catch (e: any) {
+                                                errorNotification(e)
+                                            }
+                                        }
+                                        }>
+                                        {
+                                            "Trigger2"
+                                        }
+                                    </button>
+                                </div>
+                                <div className="col" style={{ padding: "3px" }}>
+                                    <button className="btn btn-warning" style={{ fontSize: ".75rem" }}
+                                        onClick={async () => {
+                                            try {
+                                                await triggerExtend(client, constants.SECRET_LOTTERY_CONTRACT_ADDRESS)
+                                                successNotification("Trigger")
+                                                window.location.reload();
+                                            } catch (e: any) {
+                                                errorNotification(e)
+                                            }
+                                        }
+                                        }>
+                                        {
+                                            "TriggerExtend"
                                         }
                                     </button>
                                 </div>
