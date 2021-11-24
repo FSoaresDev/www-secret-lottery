@@ -45,9 +45,9 @@ export
     // For more examples, go to: https://github.com/chainapsis/keplr-example/blob/master/src/main.js
     await window.keplr.experimentalSuggestChain({
       chainId: constants.CHAIN_ID,
-      chainName: "Local Secret Chain",
-      rpc: "https://chainofsecrets.secrettestnet.io:26667",
-      rest: "https://chainofsecrets.secrettestnet.io",
+      chainName: constants.CHAIN_ID,
+      rpc: constants.RPC,
+      rest: constants.REST,
       bip44: {
         coinType: 529,
       },
@@ -97,7 +97,7 @@ export
     const accounts = await keplrOfflineSigner.getAccounts();
 
     const execute = await new SigningCosmWasmClient(
-      "https://chainofsecrets.secrettestnet.io", // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
+      constants.REST, // holodeck - https://bootstrap.secrettestnet.io; mainnet - user your LCD/REST provider
       accounts[0].address,
       window.getOfflineSigner(constants.CHAIN_ID),
       window.getEnigmaUtils(constants.CHAIN_ID),
